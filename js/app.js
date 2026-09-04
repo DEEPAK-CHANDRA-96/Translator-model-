@@ -65,6 +65,12 @@
       });
     });
     $("printBtn").addEventListener("click", () => window.print());
+    $("shareBtn").addEventListener("click", () => {
+      const txt = PalashGen.worksheetText(cur(), LANG);
+      if (window.Android && window.Android.share) window.Android.share("PALASH " + cur().id, txt);
+      else if (navigator.share) navigator.share({ title: "PALASH", text: txt }).catch(() => {});
+      else { navigator.clipboard && navigator.clipboard.writeText(txt); alert("Worksheet copy ho gayi — WhatsApp me paste karo!"); }
+    });
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
   });
 })();

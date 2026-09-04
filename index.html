@@ -9,13 +9,13 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<header><div>🌿</div><div><h1>PALASH • मातृभाषा सेतु</h1><small>Hindi → Santali / Ho / Mundari • FLN • NIPUN • Offline tablet</small></div><span class="badge" id="net">● …</span></header>
+<header><div class="logo">🌿</div><div><h1>PALASH • मातृभाषा सेतु</h1><small>Hindi → Santali / Ho / Mundari • FLN • NIPUN • Offline tablet</small></div><span class="badge" id="net">● …</span></header>
 <div style="max-width:900px;margin:0 auto;padding:0 12px"><div class="tabs no-print">
 <a href="#t-trans">🔄 अनुवाद</a><a href="#t-voice">🎙 वॉइस</a><a href="#t-lesson">📚 पाठ+वर्कशीट</a><a href="#t-cards">🃏 फ्लैशकार्ड</a>
 </div></div>
 <main>
 <div class="card"><div class="meta" id="syncNote"></div>
-<div class="row no-print"><label><input type="radio" name="lang" value="sat" checked> Santali (ᱥᱟᱱᱛᱟᱲᱤ)</label>
+<div class="row no-print langpick"><label><input type="radio" name="lang" value="sat" checked> Santali (ᱥᱟᱱᱛᱟᱲᱤ)</label>
 <label><input type="radio" name="lang" value="hoc"> Ho</label>
 <label><input type="radio" name="lang" value="unr"> Mundari</label></div></div>
 
@@ -31,7 +31,7 @@
 <div class="meta" id="vstat">तैयार।</div><div class="out" id="vout">…</div><div id="vlat"></div></div>
 
 <div class="card" id="t-lesson"><h2>📚 NIPUN पाठ + Bilingual वर्कशीट (auto-generate)</h2>
-<div class="row no-print"><select id="lesson"></select><button id="printBtn" class="sec">🖨 Print / PDF</button></div>
+<div class="row no-print"><select id="lesson"></select><button id="printBtn" class="sec">🖨 Print / PDF</button><button id="shareBtn" class="sec">📤 Share</button></div>
 <div id="sheet"></div></div>
 
 <div class="card" id="t-cards"><h2>🃏 Visual Flashcards (offline emoji-printable)</h2><div id="cards"></div>

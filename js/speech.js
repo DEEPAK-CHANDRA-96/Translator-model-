@@ -1,13 +1,26 @@
 /* Voice-to-voice: hi-IN STT -> PalashMT -> tribal TTS. Latency meter included.
-   Offline note: Web Speech API uses on-device pack when available (Android:
-   Google TTS + downloaded Hindi). If STT unavailable (no mic/pack), text
-   fallback keeps the classroom flow working offline with identical latency path. */
+   ANDROID APP: uses native bridge (window.Android) — WebView has no Web Speech
+   API, so TTS/STT go through MainActivity (offline-capable, on-device packs).
+   BROWSER: falls back to Web Speech API. Text fallback always works offline. */
 (function () {
   "use strict";
-  let rec = null, listening = false, tStart = 0;
+  const NATIVE = () => !!(window.Android && window.Android.speak);
+  let rec = null, listening = false, tStart = 0, doneCb = null;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
+  // callbacks from MainActivity (MainActivity.java calls these)
+  window.onNativeTtsDone = function () { const cb = doneCb; doneCb = null; cb && cb(); };
+  window.onNativeSpeechError = function (msg) {
+    window.__palashErr && window.__palashErr(msg);
+  };
+
   function speak(text, langCode, rate, done) {
+    if (NATIVE()) {
+      doneCb = done;
+      try { window.Android.speak(text); } catch (e) { done && done(); }
+      setTimeout(() => { const cb = doneCb; doneCb = null; cb && cb(); }, 8000);
+      return;
+    }
     try {
       speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
@@ -18,7 +31,6 @@
       u.onend = () => done && done();
       u.onerror = () => done && done();
       speechSynthesis.speak(u);
-      // Safety: never hang the latency meter
       setTimeout(() => done && done(), 6000);
     } catch (e) { done && done(); }
   }
@@ -29,14 +41,24 @@
     const speakText = PalashMT.romanOnly(r.output);
     const mtMs = Math.round((performance.now() - tStart) * 10) / 10;
     onStep({ stage: "tribal", text: r.output, roman: speakText, ms: mtMs, coverage: r.coverage });
-    // Speak Hindi echo briefly? No — speak tribal directly for classroom use.
     speak(speakText, "hi-IN", 0.85, () => {
       const total = Math.round((performance.now() - tStart) * 10) / 10;
       onStep({ stage: "done", ms: total, ok: total < 3000 });
     });
   }
+  function nativeListen(lang, onStep, onErr) {
+    tStart = performance.now();
+    window.onNativeSpeech = function (fin) {
+      onStep({ stage: "hearing", text: fin });
+      pipeline((fin || "").trim(), lang, onStep);
+    };
+    window.__palashErr = onErr;
+    try { window.Android.listen(); return true; }
+    catch (e) { onErr && onErr(String(e)); return false; }
+  }
   function toggleListen(lang, onStep, onErr) {
-    if (!SR) { onErr && onErr("STT not available on this browser — use text/तुरंत-बोलें fallback (still offline)."); return false; }
+    if (NATIVE()) return nativeListen(lang, onStep, onErr);
+    if (!SR) { onErr && onErr("STT not available — type karke ▶ dabao (offline)."); return false; }
     if (listening) { try { rec.stop(); } catch (e) {} listening = false; return false; }
     rec = new SR(); rec.lang = "hi-IN"; rec.interimResults = true; rec.maxAlternatives = 1;
     tStart = performance.now();
@@ -51,5 +73,5 @@
     try { rec.start(); listening = true; } catch (e) { onErr && onErr(String(e)); }
     return true;
   }
-  window.PalashVoice = { pipeline, toggleListen, speak, hasSTT: !!SR };
+  window.PalashVoice = { pipeline, toggleListen, speak, hasSTT: !!SR, isNative: NATIVE };
 })();

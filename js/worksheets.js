@@ -31,5 +31,13 @@
       return `<div class="card"><div class="emo">${picFor(w) || "🔸"}</div><div class="hi">${w}</div><div class="tri">${t}</div></div>`;
     }).join("") + `</div>`;
   }
-  window.PalashGen = { worksheetHTML, flashcardsHTML };
+  function worksheetText(lesson, lang) {
+    const tr = (s) => PalashMT.translate(s, lang || "sat").output;
+    let t = `PALASH ${lesson.id} | ${lesson.title_hi}\n${tr(lesson.title_hi)}\nNIPUN: ${lesson.nipun.join(", ")}\n\n`;
+    lesson.script_hi.forEach((s, i) => { t += `${i + 1}. ${s}\n   ${tr(s)}\n`; });
+    t += `\nगतिविधि: ${lesson.activity_hi}\n${tr(lesson.activity_hi)}\n\nअभ्यास:\n`;
+    lesson.assess_hi.forEach((q, i) => { t += `Q${i + 1}. ${q}\n   ${tr(q)}\n`; });
+    return t;
+  }
+  window.PalashGen = { worksheetHTML, flashcardsHTML, worksheetText };
 })();
