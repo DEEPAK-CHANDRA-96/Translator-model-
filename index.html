@@ -2,31 +2,52 @@
 <html lang="hi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PALASH MTB-MLE — Hindi → Santali/Ho/Mundari (Offline)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
+<title>PALASH MTB-MLE - Hindi to Santali/Ho/Mundari</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1b6b3a">
+<meta name="description" content="Offline AI translation: Hindi to Santali, Ho, Mundari for Jharkhand classrooms">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<header><div class="logo">🌿</div><div><h1>PALASH • मातृभाषा सेतु</h1><small>Hindi → Santali / Ho / Mundari • FLN • NIPUN • Offline tablet</small></div><span class="badge" id="net">● …</span></header>
-<div style="max-width:900px;margin:0 auto;padding:0 12px"><div class="tabs no-print">
-<a href="#t-trans">🔄 अनुवाद</a><a href="#t-voice">🎙 वॉइस</a><a href="#t-dict">📖 शब्दकोश</a><a href="#t-lesson">📚 पाठ+वर्कशीट</a><a href="#t-cards">🃏 फ्लैशकार्ड</a>
-</div></div>
+<div id="loading" class="splash">
+  <div class="splash-icon">🌿</div>
+  <div class="splash-text">PALASH</div>
+  <div class="splash-sub">मातृभाषा सेतु</div>
+  <div class="splash-bar"><div class="splash-fill"></div></div>
+</div>
+<header>
+  <div class="logo">🌿</div>
+  <div><h1>PALASH • मातृभाषा सेतु</h1><small>Hindi → Santali / Ho / Mundari • FLN • NIPUN • Offline</small></div>
+  <span class="badge" id="net">● …</span>
+</header>
+<div style="max-width:900px;margin:0 auto;padding:0 12px">
+  <div class="tabs no-print">
+    <a href="#t-trans" class="active">🔄 अनुवाद</a>
+    <a href="#t-voice">🎙 वॉइस</a>
+    <a href="#t-dict">📖 शब्दकोश</a>
+    <a href="#t-lesson">📚 पाठ</a>
+    <a href="#t-cards">🃏 फ्लैशकार्ड</a>
+  </div>
+</div>
 <main>
 <div class="card"><div class="meta" id="syncNote"></div>
-<div class="row no-print langpick"><label><input type="radio" name="lang" value="sat" checked> Santali (ᱥᱟᱱᱛᱟᱲᱤ)</label>
-<label><input type="radio" name="lang" value="hoc"> Ho</label>
-<label><input type="radio" name="lang" value="unr"> Mundari</label></div></div>
+<div class="row no-print langpick">
+  <label><input type="radio" name="lang" value="sat" checked> Santali (ᱥᱟᱱᱛᱟᱲᱤ)</label>
+  <label><input type="radio" name="lang" value="hoc"> Ho</label>
+  <label><input type="radio" name="lang" value="unr"> Mundari</label>
+</div></div>
 
 <div class="card" id="t-trans"><h2>🔄 Hindi FLN → मातृभाषा अनुवाद (on-device)</h2>
 <textarea id="hin">सभी बच्चे खड़े हो जाओ। चित्र देखो और बताओ — कितने फल हैं?</textarea>
 <div class="row no-print"><button id="tbtn">अनुवाद करें</button><button id="speakBtn" class="sec">🔊 मातृभाषा में सुनें</button></div>
 <div class="out" id="tout">…</div>
-<div class="card" style="padding:8px"><b>पाठ स्क्रिप्ट (चुने पाठ से):</b><div id="lessonScript" class="meta"></div></div></div>
+<div class="card sub-card"><b>पाठ स्क्रिप्ट (चुने पाठ से):</b><div id="lessonScript" class="meta"></div></div></div>
 
-<div class="card" id="t-voice"><h2>🎙 रियल-टाइम वॉइस → वॉइस (&lt;3s लक्ष्य)</h2>
-<div class="meta">शिक्षक Hindi बोलें → छात्र मातृभाषा में सुनें। STT (hi-IN) → PalashMT → TTS। लेटेंसी नीचे मापी जाती है।</div>
+<div class="card" id="t-voice"><h2>🎙 रियल-टाइम वॉइस → वॉइस (&lt;3s)</h2>
+<div class="meta">शिक्षक Hindi बोलें → छात्र मातृभाषा में सुनें। STT (hi-IN) → PalashMT → TTS।</div>
 <div class="row no-print"><button id="micBtn" class="warn">🎙 बोलना शुरू/बंद</button><button id="vgo" class="sec">▶ टेक्स्ट को तुरंत बोलें (offline test)</button></div>
 <div class="meta" id="vstat">तैयार।</div><div class="out" id="vout">…</div><div id="vlat"></div></div>
 

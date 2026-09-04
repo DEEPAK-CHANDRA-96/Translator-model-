@@ -1,18 +1,14 @@
-/* Voice-to-voice: hi-IN STT -> PalashMT -> tribal TTS. Latency meter included.
-   ANDROID APP: uses native bridge (window.Android) — WebView has no Web Speech
-   API, so TTS/STT go through MainActivity (offline-capable, on-device packs).
-   BROWSER: falls back to Web Speech API. Text fallback always works offline. */
+/* Voice-to-voice v2.0: hi-IN STT -> PalashMT -> tribal TTS.
+   ANDROID: native bridge (window.Android).
+   BROWSER: Web Speech API fallback. */
 (function () {
   "use strict";
   const NATIVE = () => !!(window.Android && window.Android.speak);
   let rec = null, listening = false, tStart = 0, doneCb = null, doneCb2 = null;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  // callbacks from MainActivity (MainActivity.java calls these)
   window.onNativeTtsDone = function () { const cb = doneCb; doneCb = null; cb && cb(); };
-  window.onNativeSpeechError = function (msg) {
-    window.__palashErr && window.__palashErr(msg);
-  };
+  window.onNativeSpeechError = function (msg) { window.__palashErr && window.__palashErr(msg); };
 
   function speak(text, langCode, rate, done) {
     if (NATIVE()) {
@@ -44,7 +40,6 @@
       setTimeout(() => { const cb = doneCb2; doneCb2 = null; cb && cb(); }, romans.length * 6000 + 4000);
       return;
     }
-    // browser fallback: chain utterances
     let i = 0;
     const next = () => { if (i >= romans.length) { onDone && onDone(); return; } speak(romans[i++], "hi-IN", 0.9, next); };
     next();
@@ -73,7 +68,7 @@
   }
   function toggleListen(lang, onStep, onErr) {
     if (NATIVE()) return nativeListen(lang, onStep, onErr);
-    if (!SR) { onErr && onErr("STT not available — type karke ▶ dabao (offline)."); return false; }
+    if (!SR) { onErr && onErr("STT not available — type karke dabao (offline)."); return false; }
     if (listening) { try { rec.stop(); } catch (e) {} listening = false; return false; }
     rec = new SR(); rec.lang = "hi-IN"; rec.interimResults = true; rec.maxAlternatives = 1;
     tStart = performance.now();
@@ -83,10 +78,11 @@
       onStep({ stage: "hearing", text: interim || fin });
       if (fin) { listening = false; pipeline(fin.trim(), lang, onStep); }
     };
-    rec.onerror = (e) => onErr && onErr("Mic error: " + e.error + " — type instead, translation stays offline.");
+    rec.onerror = (e) => onErr && onErr("Mic error: " + e.error);
     rec.onend = () => { listening = false; };
     try { rec.start(); listening = true; } catch (e) { onErr && onErr(String(e)); }
     return true;
   }
+  if (NATIVE()) try { window.Android.prewarmTTS(); } catch (e) {}
   window.PalashVoice = { pipeline, toggleListen, speak, speakAll, hasSTT: !!SR, isNative: NATIVE };
 })();
