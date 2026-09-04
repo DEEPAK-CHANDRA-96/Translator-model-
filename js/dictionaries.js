@@ -92,6 +92,15 @@ const PALASH_DICTS = {
     "कपड़ा": { sat: "ᱠᱤᱪᱨᱤᱡ / kichrij", hoc: "kichri", unr: "kichri" },
     "दरवाज़ा": { sat: "ᱫᱩᱣᱟᱹᱨ / duar", hoc: "duar", unr: "duar" },
     "कुर्सी": { sat: "ᱠᱩᱨᱥᱤ / kursi", hoc: "kursi", unr: "kursi" },
+    "जोड़": { sat: "ᱡᱚᱲᱟᱣ / jorao (mesal)", hoc: "jorao", unr: "jorao" },
+    "घटाव": { sat: "ᱜᱷᱟᱴᱟᱣ / ghatao", hoc: "ghatao", unr: "ghatao" },
+    "गोल": { sat: "ᱜᱚᱞ / gol", hoc: "gol", unr: "gol" },
+    "चौकोर": { sat: "ᱪᱟᱹᱣᱠᱚᱨ / chaukor", hoc: "chaukor", unr: "chaukor" },
+    "लंबा": { sat: "ᱡᱤᱞ / jil", hoc: "jil", unr: "jil" },
+    "ऊपर": { sat: "ᱪᱮᱛᱟᱱ / chetan", hoc: "chetan", unr: "chetan" },
+    "नीचे": { sat: "ᱞᱟᱛᱟᱨ / latar", hoc: "latar", unr: "latar" },
+    "अंदर": { sat: "ᱵᱷᱤᱛᱟᱹᱨ / bhitar", hoc: "bhitar", unr: "bhitar" },
+    "बाहर": { sat: "ᱵᱟᱦᱨᱮ / bahre", hoc: "bahre", unr: "bahre" },
     "मुर्गी": { sat: "ᱥᱤᱢ / sim", hoc: "sim", unr: "sim" },
     "मछली": { sat: "ᱦᱟᱹᱠᱩ / haku", hoc: "hai", unr: "hai" },
     "चावल": { sat: "ᱪᱟᱣᱞᱮ / chaole", hoc: "chauli", unr: "chauli" },
@@ -179,6 +188,15 @@ const PALASH_DICTS = {
     { hi: ["स्कूल आओ"], sat: "ᱟᱥᱲᱟ ᱦᱤᱡᱩᱜᱢᱮ! (Asra hijukʼme!)", hoc: "Iskul hijume!", unr: "Iskuul hijume!" },
     { hi: ["नाम लिखो"], sat: "ᱧᱩᱛᱩᱢ ᱚᱞᱢᱮ! (Nutum olme!)", hoc: "Nutum olme!", unr: "Nutum olme!" },
     { hi: ["गाना सुनो"], sat: "ᱥᱮᱨᱮᱧ ᱟᱸᱡᱚᱢᱢᱮ! (Seren anyomme!)", hoc: "Seren ayumme!", unr: "Seren ayumme!" },
-    { hi: ["पानी लाओ"], sat: "ᱫᱟᱜ ᱟᱹᱜᱩᱭᱢᱮ! (Dakʼ aguime!)", hoc: "Daʼ aguime!", unr: "Daʼ aguime!" }
+    { hi: ["पानी लाओ"], sat: "ᱫᱟᱜ ᱟᱹᱜᱩᱭᱢᱮ! (Dakʼ aguime!)", hoc: "Daʼ aguime!", unr: "Daʼ aguime!" },
+    { hi: ["धीरे बोलो"], sat: "ᱞᱟᱹᱭᱞᱟᱹᱭᱛᱮ ᱨᱚᱲᱢᱮ! (Lailaite rorme!)", hoc: "Lailai te kajime!", unr: "Lailai te kajime!" },
+    { hi: ["कॉपी निकालो"], sat: "ᱠᱟᱹᱯᱤ ᱚᱰᱚᱠᱢᱮ! (Kapi odokme!)", hoc: "Kapi odokme!", unr: "Kapi odokme!" },
+    { hi: ["पेंसिल उठाओ"], sat: "ᱯᱮᱱᱥᱤᱞ ᱛᱩᱞᱢᱮ! (Pensil tulme!)", hoc: "Pensil tulme!", unr: "Pensil tulme!" },
+    { hi: ["मैदान में चलो"], sat: "ᱢᱟᱭᱫᱟᱱᱛᱮ ᱪᱟᱞᱟᱜᱢᱮ! (Maidante chalakʼme!)", hoc: "Maidante senme!", unr: "Maidante senme!" },
+    { hi: ["हाथ धो लो"], sat: "ᱛᱤ ᱟᱨᱩᱵᱢᱮ! (Ti arubme!)", hoc: "Tii arubme!", unr: "Tii arubme!" },
+    { hi: ["शांत हो जाओ"], sat: "ᱪᱩᱯᱪᱟᱹᱯᱢᱮ! (Chupchapme!)", hoc: "Chupchapme!", unr: "Chupchapme!" },
+    { hi: ["बस्ता उठाओ"], sat: "ᱛᱷᱟᱹᱞᱤ ᱛᱩᱞᱢᱮ! (Thali tulme!)", hoc: "Thali tulme!", unr: "Thali tulme!" },
+    { hi: ["खड़े होकर पढ़ो"], sat: "ᱛᱤᱸᱜᱩᱱᱠᱟᱛᱮ ᱯᱟᱲᱦᱟᱣᱢᱮ! (Tingunkate parhawme!)", hoc: "Tingunkate parhawme!", unr: "Tingunkate parhawme!" },
+    { hi: ["घर का काम दिखाओ"], sat: "ᱚᱲᱟᱜ ᱠᱟᱹᱢᱤ ᱩᱫᱩᱜᱢᱮ! (Orakʼ kami udugme!)", hoc: "Oraʼ kami udugme!", unr: "Oraʼ kami udugme!" }
   ]
 };

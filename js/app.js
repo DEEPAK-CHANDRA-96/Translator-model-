@@ -21,6 +21,18 @@
       : "कंटेंट सिंक हो चुका है — अब इंटरनेट बंद करके भी पूरा ऐप चलेगा।";
   }
   function cur() { return DATA.lessons.find(l => l.id === $("lesson").value); }
+  function dictSearch() {
+    const q = ($("dictSearch").value || "").trim();
+    const box = $("dictResults");
+    if (!q) { box.textContent = "ऊपर शब्द लिखते ही अर्थ दिखेगा।"; return; }
+    const hits = Object.keys(PALASH_DICTS.words).filter(w => w.includes(q)).slice(0, 20);
+    const lname = { sat: "Santali", hoc: "Ho", unr: "Mundari" }[LANG];
+    if (!hits.length) { box.innerHTML = `❌ "${q}" शब्दकोश में नहीं — पूरा वाक्य ऊपर 🔄 अनुवाद में डालकर देखो।`; return; }
+    box.innerHTML = hits.map(w => {
+      const t = PALASH_DICTS.words[w][LANG];
+      return `<div style="padding:6px 0;border-bottom:1px solid #ccd"><b>${w}</b> → <span class="tri">${t}</span> <button class="sec" style="padding:4px 10px;font-size:13px" onclick="PalashVoice.speak(PalashMT.romanOnly('${t}'.replace(/'/g,'')), 'hi-IN', 0.9)">🔊</button></div>`;
+    }).join("") + `<div class="meta">${hits.length} परिणाम • ${lname}</div>`;
+  }
   function doTranslate() {
     const t = $("hin").value.trim() || $("lessonScript").textContent;
     const r = PalashMT.translate(t, LANG);
@@ -33,11 +45,11 @@
     $("lessonScript").innerHTML = l.script_hi.map(s => `<div>• ${s}</div>`).join("");
     const out = PalashGen.worksheetHTML(l, LANG, DATA.nipun);
     $("sheet").innerHTML = out;
-    $("cards").innerHTML = PalashGen.flashcardsHTML(["पेड़", "फूल", "नदी", "फल", "आम", "केला", "गाय", "सूरज", "पानी", "किताब", "एक", "दो", "तीन"], LANG);
+    $("cards").innerHTML = PalashGen.flashcardsHTML(["पेड़", "फूल", "नदी", "फल", "आम", "केला", "गाय", "कुत्ता", "घोड़ा", "सूरज", "बारिश", "पहाड़", "बाज़ार", "पानी", "किताब", "एक", "दो", "तीन"], LANG);
   }
   window.addEventListener("DOMContentLoaded", () => {
     load();
-    document.querySelectorAll("input[name=lang]").forEach(r => r.addEventListener("change", e => { LANG = e.target.value; doTranslate(); renderLesson(); }));
+    document.querySelectorAll("input[name=lang]").forEach(r => r.addEventListener("change", e => { LANG = e.target.value; doTranslate(); renderLesson(); dictSearch(); }));
     $("lesson").addEventListener("change", renderLesson);
     $("tbtn").addEventListener("click", doTranslate);
     $("speakBtn").addEventListener("click", () => {
@@ -65,6 +77,18 @@
       });
     });
     $("printBtn").addEventListener("click", () => window.print());
+    let zoom = 1;
+    $("zoomBtn").addEventListener("click", () => {
+      zoom = zoom >= 1.3 ? 1 : +(zoom + 0.15).toFixed(2);
+      document.querySelector("main").style.zoom = zoom;
+      $("zoomBtn").textContent = zoom > 1 ? `🔍 सामान्य (A) — अभी ${Math.round(zoom * 100)}%` : "🔍 अक्षर बड़े (A+)";
+    });
+    $("speakAllBtn").addEventListener("click", () => {
+      const l = cur();
+      $("speakAllBtn").textContent = "⏳ सुना रहे हैं…";
+      PalashVoice.speakAll([l.title_hi, ...l.script_hi], LANG, () => { $("speakAllBtn").textContent = "🔊 पूरा पाठ सुनाओ"; });
+    });
+    $("dictSearch").addEventListener("input", dictSearch);
     $("shareBtn").addEventListener("click", () => {
       const txt = PalashGen.worksheetText(cur(), LANG);
       if (window.Android && window.Android.share) window.Android.share("PALASH " + cur().id, txt);

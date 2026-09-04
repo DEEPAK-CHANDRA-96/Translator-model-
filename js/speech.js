@@ -5,7 +5,7 @@
 (function () {
   "use strict";
   const NATIVE = () => !!(window.Android && window.Android.speak);
-  let rec = null, listening = false, tStart = 0, doneCb = null;
+  let rec = null, listening = false, tStart = 0, doneCb = null, doneCb2 = null;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   // callbacks from MainActivity (MainActivity.java calls these)
@@ -33,6 +33,21 @@
       speechSynthesis.speak(u);
       setTimeout(() => done && done(), 6000);
     } catch (e) { done && done(); }
+  }
+  function speakAll(hindiLines, lang, onDone) {
+    const romans = hindiLines.map(h => PalashMT.romanOnly(PalashMT.translate(h, lang).output));
+    if (NATIVE() && window.Android.speakQueue) {
+      try { window.Android.stopSpeak(); romans.forEach(t => window.Android.speakQueue(t)); } catch (e) {}
+      let n = 0;
+      window.onNativeTtsDone = function () { n++; if (n >= romans.length) { const cb = doneCb2; doneCb2 = null; cb && cb(); } };
+      doneCb2 = onDone;
+      setTimeout(() => { const cb = doneCb2; doneCb2 = null; cb && cb(); }, romans.length * 6000 + 4000);
+      return;
+    }
+    // browser fallback: chain utterances
+    let i = 0;
+    const next = () => { if (i >= romans.length) { onDone && onDone(); return; } speak(romans[i++], "hi-IN", 0.9, next); };
+    next();
   }
   function pipeline(hindiText, lang, onStep) {
     tStart = performance.now();
@@ -73,5 +88,5 @@
     try { rec.start(); listening = true; } catch (e) { onErr && onErr(String(e)); }
     return true;
   }
-  window.PalashVoice = { pipeline, toggleListen, speak, hasSTT: !!SR, isNative: NATIVE };
+  window.PalashVoice = { pipeline, toggleListen, speak, speakAll, hasSTT: !!SR, isNative: NATIVE };
 })();

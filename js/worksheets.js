@@ -28,7 +28,7 @@
   function flashcardsHTML(words, lang) {
     return `<div class="cards">` + words.map(w => {
       const t = (PALASH_DICTS.words[w] && PALASH_DICTS.words[w][lang]) || w;
-      return `<div class="card"><div class="emo">${picFor(w) || "🔸"}</div><div class="hi">${w}</div><div class="tri">${t}</div></div>`;
+      return `<div class="fcard" onclick="this.classList.toggle('flip')"><div class="fin"><div class="face front"><div class="emo">${picFor(w) || "🔸"}</div><div class="hi">${w}</div><div class="meta">tap 👆</div></div><div class="face back"><div class="tri" style="font-size:19px">${t}</div></div></div></div>`;
     }).join("") + `</div>`;
   }
   function worksheetText(lesson, lang) {
