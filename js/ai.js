@@ -38,6 +38,7 @@
   function translate(text, lang, timeoutMs) {
     var t = norm(text);
     if (!t) return Promise.resolve(null);
+    if (t.length > 240) t = t.slice(0, 240);
     var key = t + "|" + lang;
     if (cache[key]) return Promise.resolve(cache[key]);
     if (!online()) return Promise.resolve(null);
@@ -49,21 +50,28 @@
       mode: "formal",
       numerals_format: "international"
     };
-    var ok = false;
-    var ctl = new AbortController();
-    var timer = setTimeout(function () { if (!ok) try { ctl.abort(); } catch (e) {} }, timeoutMs || 6000);
-    return fetch(URL, {
-      method: "POST",
-      headers: { "api-subscription-key": KEY, "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-      signal: ctl.signal
-    }).then(function (r) { ok = true; clearTimeout(timer); return r.json(); })
-      .then(function (j) {
-        var out = (j && j.translated_text) ? j.translated_text : null;
-        if (out) cachePut(key, out);
-        return out;
-      })
-      .catch(function () { clearTimeout(timer); return null; });
+    var limit = timeoutMs || 6000;
+    function attempt() {
+      var ok = false;
+      var ctl = new AbortController();
+      var timer = setTimeout(function () { if (!ok) try { ctl.abort(); } catch (e) {} }, limit);
+      return fetch(URL, {
+        method: "POST",
+        headers: { "api-subscription-key": KEY, "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: ctl.signal
+      }).then(function (r) { ok = true; clearTimeout(timer); return r.json(); })
+        .then(function (j) {
+          var out = (j && j.translated_text) ? j.translated_text : null;
+          if (out) cachePut(key, out);
+          return out;
+        })
+        .catch(function () { clearTimeout(timer); return null; });
+    }
+    return attempt().then(function (out) {
+      if (out) return out;
+      return attempt();
+    });
   }
 
   /* Key sanity probe: returns promise<boolean> */

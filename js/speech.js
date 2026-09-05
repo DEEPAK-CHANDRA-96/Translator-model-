@@ -1,20 +1,35 @@
-/* Voice-to-voice v2.0: hi-IN STT -> PalashMT -> tribal TTS.
+/* Voice-to-voice v2.1: hi-IN STT -> PalashMT/AI -> tribal TTS.
    ANDROID: native bridge (window.Android).
-   BROWSER: Web Speech API fallback. */
+   BROWSER: Web Speech API fallback.
+   Offline dict speaks instantly; Sarvam AI upgrades text + re-speaks.
+   Ol Chiki output is transliterated to Latin for TTS (js/olchiki.js). */
 (function () {
   "use strict";
   const NATIVE = () => !!(window.Android && window.Android.speak);
-  let rec = null, listening = false, tStart = 0, doneCb = null, doneCb2 = null;
+  let rec = null, listening = false, pipelineStart = 0, doneCb = null, doneCb2 = null;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  window.onNativeTtsDone = function () { const cb = doneCb; doneCb = null; cb && cb(); };
   window.onNativeSpeechError = function (msg) { window.__palashErr && window.__palashErr(msg); };
 
+  function speakable(text) {
+    if (!text) return text;
+    var rom = PalashMT.romanOnly(text);
+    if (/[A-Za-z]/.test(rom)) return rom;
+    if (/[\u1C50-\u1C7F]/.test(text) && window.OlChiki) return OlChiki.toLatin(text);
+    return text;
+  }
+  function cancelSpeak() {
+    try { if (NATIVE() && window.Android.stopSpeak) window.Android.stopSpeak(); } catch (e) {}
+    try { if (window.speechSynthesis && speechSynthesis.cancel) speechSynthesis.cancel(); } catch (e) {}
+  }
   function speak(text, langCode, rate, done) {
+    const cb = done;
+    const finish = () => { if (doneCb === cb) doneCb = null; cb && cb(); };
     if (NATIVE()) {
-      doneCb = done;
-      try { window.Android.speak(text); } catch (e) { done && done(); }
-      setTimeout(() => { const cb = doneCb; doneCb = null; cb && cb(); }, 8000);
+      doneCb = cb;
+      window.onNativeTtsDone = finish;
+      try { window.Android.speak(text); } catch (e) { finish(); }
+      setTimeout(finish, 9000);
       return;
     }
     try {
@@ -24,20 +39,20 @@
       const vs = speechSynthesis.getVoices();
       const pick = vs.find(v => v.lang && v.lang.startsWith((langCode || "hi").slice(0, 2)));
       if (pick) u.voice = pick;
-      u.onend = () => done && done();
-      u.onerror = () => done && done();
+      u.onend = finish;
+      u.onerror = finish;
       speechSynthesis.speak(u);
-      setTimeout(() => done && done(), 6000);
-    } catch (e) { done && done(); }
+      setTimeout(finish, 7000);
+    } catch (e) { finish(); }
   }
   function speakAll(hindiLines, lang, onDone) {
-    const romans = hindiLines.map(h => PalashMT.romanOnly(PalashMT.translate(h, lang).output));
+    const romans = hindiLines.map(h => speakable(PalashMT.translate(h, lang).output));
     if (NATIVE() && window.Android.speakQueue) {
       try { window.Android.stopSpeak(); romans.forEach(t => window.Android.speakQueue(t)); } catch (e) {}
       let n = 0;
       window.onNativeTtsDone = function () { n++; if (n >= romans.length) { const cb = doneCb2; doneCb2 = null; cb && cb(); } };
       doneCb2 = onDone;
-      setTimeout(() => { const cb = doneCb2; doneCb2 = null; cb && cb(); }, romans.length * 6000 + 4000);
+      setTimeout(() => { const cb = doneCb2; doneCb2 = null; cb && cb(); }, romans.length * 7000 + 4000);
       return;
     }
     let i = 0;
@@ -45,26 +60,34 @@
     next();
   }
   function pipeline(hindiText, lang, onStep) {
-    tStart = performance.now();
+    pipelineStart = performance.now();
     onStep({ stage: "hindi", text: hindiText, ms: 0 });
     const r = PalashMT.translate(hindiText, lang);
-    const wantAI = !!(window.PalashAI && PalashAI.enabled() && PalashAI.online() && r.coverage < 1);
-    const finish = (output, coverage, aiUsed) => {
-      const speakText = PalashMT.romanOnly(output);
-      const mtMs = Math.round((performance.now() - tStart) * 10) / 10;
-      onStep({ stage: "tribal", text: output, roman: speakText, ms: mtMs, coverage, ai: aiUsed });
-      speak(speakText, "hi-IN", 0.85, () => {
-        const total = Math.round((performance.now() - tStart) * 10) / 10;
-        onStep({ stage: "done", ms: total, ok: total < 3000 });
-      });
-    };
-    if (!wantAI) { finish(r.output, r.coverage, false); return; }
-    PalashAI.translate(hindiText, lang, 1600).then(ai => {
-      finish(ai ? ai : r.output, ai ? 1 : r.coverage, !!ai);
+    const mtMs = Math.round((performance.now() - pipelineStart));
+    onStep({ stage: "tribal", text: r.output, roman: speakable(r.output), ms: mtMs, coverage: r.coverage });
+    cancelSpeak();
+    speak(speakable(r.output), "hi-IN", 0.85, () => {
+      const total = Math.round((performance.now() - pipelineStart));
+      onStep({ stage: "done", ms: total, ok: total < 3000, ai: false });
     });
+    const wantAI = !!(window.PalashAI && PalashAI.enabled() && PalashAI.online() && r.coverage < 1);
+    if (wantAI) {
+      const aiMs = Math.round((performance.now() - pipelineStart));
+      onStep({ stage: "ai", ms: aiMs });
+      PalashAI.translate(hindiText, lang, 7000).then(ai => {
+        if (!ai) return;
+        const arrival = Math.round(performance.now() - pipelineStart);
+        cancelSpeak();
+        onStep({ stage: "tribal", text: ai, roman: speakable(ai), ms: arrival, coverage: 1, ai: true });
+        cancelSpeak();
+        speak(speakable(ai), "hi-IN", 0.85, () => {
+          onStep({ stage: "aifin", ms: Math.round(performance.now() - pipelineStart), ok: arrival < 3000 });
+        });
+      });
+    }
   }
   function nativeListen(lang, onStep, onErr) {
-    tStart = performance.now();
+    pipelineStart = performance.now();
     window.onNativeSpeech = function (fin) {
       onStep({ stage: "hearing", text: fin });
       pipeline((fin || "").trim(), lang, onStep);
@@ -78,10 +101,10 @@
     if (!SR) { onErr && onErr("STT not available — type karke dabao (offline)."); return false; }
     if (listening) { try { rec.stop(); } catch (e) {} listening = false; return false; }
     rec = new SR(); rec.lang = "hi-IN"; rec.interimResults = true; rec.maxAlternatives = 1;
-    tStart = performance.now();
+    pipelineStart = performance.now();
     rec.onresult = (e) => {
       let interim = "", fin = "";
-      for (const r of e.results) { if (r.isFinal) fin += r[0].transcript; else interim += r[0].transcript; }
+      for (const x of e.results) { if (x.isFinal) fin += x[0].transcript; else interim += x[0].transcript; }
       onStep({ stage: "hearing", text: interim || fin });
       if (fin) { listening = false; pipeline(fin.trim(), lang, onStep); }
     };
@@ -91,5 +114,5 @@
     return true;
   }
   if (NATIVE()) try { window.Android.prewarmTTS(); } catch (e) {}
-  window.PalashVoice = { pipeline, toggleListen, speak, speakAll, hasSTT: !!SR, isNative: NATIVE };
+  window.PalashVoice = { pipeline, toggleListen, speak, speakable, speakAll, cancelSpeak, hasSTT: !!SR, isNative: NATIVE };
 })();

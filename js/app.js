@@ -85,16 +85,21 @@
     $("speakBtn").addEventListener("click", () => {
       const r = PalashMT.translate($("hin").value.trim() || "सभी बच्चे खड़े हो जाओ", LANG);
       $("tout").innerHTML = "<div>" + r.output + "</div>";
-      PalashVoice.speak(PalashMT.romanOnly(r.output), "hi-IN", 0.85);
+      PalashVoice.speak(PalashVoice.speakable(r.output), "hi-IN", 0.85);
     });
     $("micBtn").addEventListener("click", () => {
       const ok = PalashVoice.toggleListen(LANG, (s) => {
         if (s.stage === "hearing") $("vstat").textContent = "🎙 सुन रहे हैं: " + s.text;
         if (s.stage === "hindi") { $("vstat").textContent = "🗣 शिक्षक (Hindi): " + s.text; $("hin").value = s.text; }
+        if (s.stage === "ai") $("vstat").textContent = "✨ Sarvam AI पूरा-वाक्य अनुवाद कर रहा है…";
         if (s.stage === "tribal") $("vout").innerHTML = '<div class="tri">' + s.text + '</div><div class="meta">MT ' + s.ms + 'ms • coverage ' + Math.round(s.coverage * 100) + "%" + (s.ai ? ' <span class="ai-badge">✨ Sarvam AI</span>' : "") + "</div>";
         if (s.stage === "done") {
           $("vlat").innerHTML = "कुल वॉइस-लेटेंसी: <span class=\"lat " + (s.ok ? "ok" : "bad") + "\">" + s.ms + "ms " + (s.ok ? "✅" : "⚠️") + "</span>";
           $("vstat").textContent = "तैयार — फिर बोलें।";
+        }
+        if (s.stage === "aifin") {
+          $("vlat").innerHTML += ' <span class="meta">✨ AI version बोल गया (कुल ' + s.ms + "ms)</span>";
+          $("vstat").textContent = "✅ AI बेहतर अनुवाद सुनाया — फिर बोलें।";
         }
       }, (e) => { $("vstat").textContent = "⚠️ " + e; });
       if (ok) $("vstat").textContent = "🎙 बोलें… (hi-IN)";
