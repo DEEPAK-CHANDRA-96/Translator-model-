@@ -36,7 +36,7 @@
     const L = lang || "sat";
     const lname = { sat: "Santali", hoc: "Ho", unr: "Mundari" }[L];
     const tr = (s) => PalashMT.translate(s, L).output;
-    let h = '<div class="sheet"><div class="sheet-head"><b>PALASH • ' + lesson.id + " • " + lname + '</b><span>NIPUN: ' + lesson.nipun.join(", ") + '</span></div><h2>' + lesson.title_hi + '</h2><p class="tri">' + tr(lesson.title_hi) + '</p><div class="nipun">';
+    let h = '<div class="sheet"><div class="sheet-head"><b>VaniSanchar • ' + lesson.id + " • " + lname + '</b><span>NIPUN: ' + lesson.nipun.join(", ") + '</span></div><h2>' + lesson.title_hi + '</h2><p class="tri">' + tr(lesson.title_hi) + '</p><div class="nipun">';
     lesson.nipun.forEach(c => { h += '<span title="' + nipun[c] + '">' + c + ": " + nipun[c] + "</span>"; });
     h += '</div><h3>📖 पाठ (Bilingual script)</h3><ol>';
     lesson.script_hi.forEach(s => { h += '<li><div>' + s + '</div><div class="tri">' + tr(s) + '</div></li>'; });
@@ -58,7 +58,7 @@
   }
   function worksheetText(lesson, lang) {
     const tr = (s) => PalashMT.translate(s, lang || "sat").output;
-    let t = "PALASH " + lesson.id + " | " + lesson.title_hi + "\n" + tr(lesson.title_hi) + "\nNIPUN: " + lesson.nipun.join(", ") + "\n\n";
+    let t = "VaniSanchar " + lesson.id + " | " + lesson.title_hi + "\n" + tr(lesson.title_hi) + "\nNIPUN: " + lesson.nipun.join(", ") + "\n\n";
     lesson.script_hi.forEach((s, i) => { t += (i + 1) + ". " + s + "\n   " + tr(s) + "\n"; });
     t += "\nगतिविधि: " + lesson.activity_hi + "\n" + tr(lesson.activity_hi) + "\n\nअभ्यास:\n";
     lesson.assess_hi.forEach((q, i) => { t += "Q" + (i + 1) + ". " + q + "\n   " + tr(q) + "\n"; });

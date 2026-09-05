@@ -73,8 +73,8 @@
   function shareWorksheet() {
     const l = cur(); if (!l) return;
     const txt = PalashGen.worksheetText(l, LANG);
-    if (window.Android && window.Android.share) window.Android.share("PALASH " + l.id, txt);
-    else if (navigator.share) navigator.share({ title: "PALASH", text: txt }).catch(() => {});
+    if (window.Android && window.Android.share) window.Android.share("VaniSanchar " + l.id, txt);
+    else if (navigator.share) navigator.share({ title: "VaniSanchar", text: txt }).catch(() => {});
     else { navigator.clipboard && navigator.clipboard.writeText(txt); alert("वर्कशीट copy ho gayi — WhatsApp me paste karo!"); }
   }
   window.addEventListener("DOMContentLoaded", () => {
