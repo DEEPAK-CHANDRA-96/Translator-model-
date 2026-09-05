@@ -23,6 +23,15 @@
     if (note) note.textContent = off
       ? "ऑफ़लाइन मोड: सभी अनुवाद + वर्कशीट डिवाइस पर ही चल रहे हैं।"
       : "कंटेंट सिंक हो चुका है — अब इंटरनेट बंद करके भी पूरा ऐप चलेगा।";
+    aiStatus();
+  }
+  function aiStatus() {
+    const st = $("aiStatus");
+    if (!st) return;
+    if (!window.PalashAI) { st.textContent = "AI offline."; return; }
+    if (!navigator.onLine) { st.textContent = "🌐 AI needs internet"; return; }
+    const on = PalashAI.enabled();
+    st.textContent = on ? "✅ AI चालू — अनुवाद में Sarvam AI (sat-IN) इस्तेमाल होगा" : "💤 AI बंद — सिर्फ on-device शब्दकोश";
   }
   function cur() { return DATA && DATA.lessons ? DATA.lessons.find(l => l.id === $("lesson").value) : null; }
   function dictSearch() {
@@ -38,11 +47,21 @@
       return '<div class="dict-item"><b>' + w + '</b> → <span class="tri">' + t + '</span> <span class="meta">(' + roman + ')</span> <button class="sec sm" onclick="PalashVoice.speak(\'' + roman.replace(/'/g, "") + '\', \'hi-IN\', 0.9)">🔊</button></div>';
     }).join("") + '<div class="meta">' + hits.length + " परिणाम • " + lname + "</div>";
   }
+  function showResult(r, aiUsed) {
+    $("tout").innerHTML = '<div>' + r.output + '</div>' +
+      '<div class="meta">⏱ ' + r.ms + 'ms • coverage ' + Math.round(r.coverage * 100) + '% • ' + (r.fullPhrase ? "phrase-match ✅" : "word-gloss") + " • " + { sat: "Santali", hoc: "Ho", unr: "Mundari" }[LANG] + (aiUsed ? ' <span class="ai-badge">✨ Sarvam AI</span>' : "") + "</div>";
+  }
   function doTranslate() {
     const t = $("hin").value.trim() || ($("lessonScript") ? $("lessonScript").textContent : "");
     const r = PalashMT.translate(t, LANG);
-    $("tout").innerHTML = '<div>' + r.output + '</div>' +
-      '<div class="meta">⏱ ' + r.ms + 'ms • coverage ' + Math.round(r.coverage * 100) + '% • ' + (r.fullPhrase ? "phrase-match ✅" : "word-gloss") + " • " + { sat: "Santali", hoc: "Ho", unr: "Mundari" }[LANG] + "</div>";
+    showResult(r, false);
+    if (window.PalashAI && PalashAI.enabled() && PalashAI.online() && r.coverage < 1) {
+      PalashAI.translate(t, LANG, 6000).then(ai => {
+        if (!ai || $("hin").value.trim() !== t) return;
+        $("tout").innerHTML = '<div class="tri">' + ai + '</div>' +
+          '<div class="meta">✨ Sarvam AI (hi-IN → sat-IN) • full-sentence translation</div>';
+      }).catch(() => {});
+    }
     return r;
   }
   function renderLesson() {
@@ -72,7 +91,7 @@
       const ok = PalashVoice.toggleListen(LANG, (s) => {
         if (s.stage === "hearing") $("vstat").textContent = "🎙 सुन रहे हैं: " + s.text;
         if (s.stage === "hindi") { $("vstat").textContent = "🗣 शिक्षक (Hindi): " + s.text; $("hin").value = s.text; }
-        if (s.stage === "tribal") $("vout").innerHTML = '<div class="tri">' + s.text + '</div><div class="meta">MT ' + s.ms + 'ms • coverage ' + Math.round(s.coverage * 100) + "%</div>";
+        if (s.stage === "tribal") $("vout").innerHTML = '<div class="tri">' + s.text + '</div><div class="meta">MT ' + s.ms + 'ms • coverage ' + Math.round(s.coverage * 100) + "%" + (s.ai ? ' <span class="ai-badge">✨ Sarvam AI</span>' : "") + "</div>";
         if (s.stage === "done") {
           $("vlat").innerHTML = "कुल वॉइस-लेटेंसी: <span class=\"lat " + (s.ok ? "ok" : "bad") + "\">" + s.ms + "ms " + (s.ok ? "✅" : "⚠️") + "</span>";
           $("vstat").textContent = "तैयार — फिर बोलें।";
@@ -101,6 +120,22 @@
     });
     $("dictSearch").addEventListener("input", dictSearch);
     $("shareBtn").addEventListener("click", shareWorksheet);
+    const aiChk = $("aiOn");
+    if (aiChk && window.PalashAI) {
+      aiChk.checked = PalashAI.enabled();
+      aiChk.addEventListener("change", () => {
+        PalashAI.setEnabled(aiChk.checked);
+        if (aiChk.checked && navigator.onLine) {
+          aiChk.disabled = true;
+          $("aiStatus").textContent = "⏳ Sarvam AI key जाँच रहे हैं…";
+          PalashAI.test(true).then(ok => {
+            aiChk.disabled = false;
+            aiStatus();
+            if (!ok) $("aiStatus").textContent = "⚠️ AI key नहीं चला — फिर से कोशिश करो।";
+          });
+        } else aiStatus();
+      });
+    }
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
   });
 })();

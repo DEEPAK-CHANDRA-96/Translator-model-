@@ -28,6 +28,7 @@ button.sec{background:#eef2ee;color:#1e2a1e;border:1px solid #c4d4c4;box-shadow:
 button.warn{background:var(--acc2);box-shadow:0 2px 8px #c7780044}
 button.sm{padding:6px 10px;font-size:12px;min-height:32px;border-radius:8px}
 .langpick{display:flex;gap:6px;flex-wrap:wrap}.langpick label{background:var(--soft);border:2px solid #b9d2b9;border-radius:24px;padding:8px 14px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s}
+.ai-toggle{margin-top:8px;align-items:center;gap:8px}.ai-toggle label{font-size:14px;font-weight:700;color:var(--acc);cursor:pointer}.ai-badge{display:inline-block;background:linear-gradient(90deg,#7c3aed,#2563eb);color:#fff;font-size:11px;font-weight:800;border-radius:20px;padding:2px 8px;margin-left:4px;vertical-align:middle}
 .langpick label:has(input:checked){background:var(--acc);color:#fff;border-color:var(--acc)}
 .tri{color:var(--tri);font-weight:700}.meta{font-size:13px;color:#5a6b5a}
 .out{background:#f0f6ff;border-radius:12px;padding:12px;margin-top:10px;font-size:18px;border-left:5px solid var(--tri);min-height:40px}

@@ -48,12 +48,19 @@
     tStart = performance.now();
     onStep({ stage: "hindi", text: hindiText, ms: 0 });
     const r = PalashMT.translate(hindiText, lang);
-    const speakText = PalashMT.romanOnly(r.output);
-    const mtMs = Math.round((performance.now() - tStart) * 10) / 10;
-    onStep({ stage: "tribal", text: r.output, roman: speakText, ms: mtMs, coverage: r.coverage });
-    speak(speakText, "hi-IN", 0.85, () => {
-      const total = Math.round((performance.now() - tStart) * 10) / 10;
-      onStep({ stage: "done", ms: total, ok: total < 3000 });
+    const wantAI = !!(window.PalashAI && PalashAI.enabled() && PalashAI.online() && r.coverage < 1);
+    const finish = (output, coverage, aiUsed) => {
+      const speakText = PalashMT.romanOnly(output);
+      const mtMs = Math.round((performance.now() - tStart) * 10) / 10;
+      onStep({ stage: "tribal", text: output, roman: speakText, ms: mtMs, coverage, ai: aiUsed });
+      speak(speakText, "hi-IN", 0.85, () => {
+        const total = Math.round((performance.now() - tStart) * 10) / 10;
+        onStep({ stage: "done", ms: total, ok: total < 3000 });
+      });
+    };
+    if (!wantAI) { finish(r.output, r.coverage, false); return; }
+    PalashAI.translate(hindiText, lang, 1600).then(ai => {
+      finish(ai ? ai : r.output, ai ? 1 : r.coverage, !!ai);
     });
   }
   function nativeListen(lang, onStep, onErr) {

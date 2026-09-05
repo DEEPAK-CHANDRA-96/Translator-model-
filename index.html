@@ -40,9 +40,10 @@
   <label><input type="radio" name="lang" value="unr"> Mundari</label>
 </div></div>
 
-<div class="card" id="t-trans"><h2>🔄 Hindi FLN → मातृभाषा अनुवाद (on-device)</h2>
+<div class="card" id="t-trans"><h2>🔄 Hindi FLN → मातृभाषा अनुवाद</h2>
 <textarea id="hin">सभी बच्चे खड़े हो जाओ। चित्र देखो और बताओ — कितने फल हैं?</textarea>
 <div class="row no-print"><button id="tbtn">अनुवाद करें</button><button id="speakBtn" class="sec">🔊 मातृभाषा में सुनें</button></div>
+<div class="row no-print ai-toggle"><label><input type="checkbox" id="aiOn"> ✨ Sarvam AI (ऑनलाइन पूरा-वाक्य अनुवाद)</label><span class="meta" id="aiStatus"></span></div>
 <div class="out" id="tout">…</div>
 <div class="card sub-card"><b>पाठ स्क्रिप्ट (चुने पाठ से):</b><div id="lessonScript" class="meta"></div></div></div>
 
@@ -65,6 +66,7 @@
 </main>
 <script src="js/dictionaries.js"></script>
 <script src="js/translator.js"></script>
+<script src="js/ai.js"></script>
 <script src="js/speech.js"></script>
 <script src="js/worksheets.js"></script>
 <script src="js/app.js"></script>
