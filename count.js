@@ -1,0 +1,1 @@
+const fs=require('fs'); const t=fs.readFileSync('js/dictionaries.js','utf8'); eval(t); console.log('WORDS:'+Object.keys(PALASH_DICTS.words).length); console.log('PHRASES:'+PALASH_DICTS.phrases.length);
