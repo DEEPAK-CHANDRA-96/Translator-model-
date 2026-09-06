@@ -30,6 +30,7 @@
     <a href="#t-dict">📖 शब्दकोश</a>
     <a href="#t-lesson">📚 पाठ</a>
     <a href="#t-cards">🃏 फ्लैशकार्ड</a>
+    <a href="#t-corr">✍️ शिक्षक सुधार</a>
   </div>
 </div>
 <main>
@@ -63,9 +64,27 @@
 
 <div class="card" id="t-cards"><h2>🃏 Visual Flashcards (offline emoji-printable)</h2><div id="cards"></div>
 <div class="meta">2GB RAM / Android 9+ हेतु: zero-dependency, &lt;500KB, service-worker cached, file:// से भी चलता है।</div></div>
+
+<div class="card" id="t-corr"><h2>✍️ शिक्षक सुधार अभिलेख (Saved Corrections)</h2>
+<div class="meta">अनुवाद करो → "✅ सही है" या "✏️ सुधारें" → रिकॉर्ड अपने डिवाइस पर सहेजा जाता है (offline, कोई निजी जानकारी नहीं)। मूल अनुवाद कभी नहीं बदलता। सिर्फ <b>VERIFIED</b> रिकॉर्ड भविष्य के ML training में जाएँगे।</div>
+<div id="corrStats"></div>
+<div class="row no-print">
+  <button id="exportCsv" class="sec">📄 Export CSV</button>
+  <button id="exportJsonl" class="sec">📑 Export JSONL</button>
+  <select id="corrFilter" class="sec" style="width:auto;padding:6px 10px;">
+    <option value="">सभी भाषाएँ</option>
+    <option value="Santali">Santali</option>
+    <option value="Ho">Ho</option>
+    <option value="Mundari">Mundari</option>
+  </select>
+  <button id="corrRefresh" class="sec">🔄 रीफ्रेश</button>
+</div>
+<div id="corrList"></div>
+<div class="meta">हर रिकॉर्ड में original + corrected दोनों रहते हैं। Export → CSV या JSONL (किसी भी समय, offline)।</div></div>
 </main>
 <script src="js/dictionaries.js"></script>
 <script src="js/translator.js"></script>
+<script src="js/corrections.js"></script>
 <script src="js/olchiki.js"></script>
 <script src="js/ai.js"></script>
 <script src="js/speech.js"></script>

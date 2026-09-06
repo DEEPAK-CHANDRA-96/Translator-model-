@@ -11,6 +11,7 @@
     const sel = $("lesson");
     if (DATA.lessons) DATA.lessons.forEach(l => { const o = document.createElement("option"); o.value = l.id; o.textContent = l.id + " • " + l.title_hi; sel.appendChild(o); });
     renderLesson(); badge();
+    if (window.PalashCorr) renderCorrScreen();
     window.addEventListener("online", badge); window.addEventListener("offline", badge);
     if ($("loading")) $("loading").style.display = "none";
   }
@@ -50,6 +51,24 @@
   function showResult(r, aiUsed) {
     $("tout").innerHTML = '<div>' + r.output + '</div>' +
       '<div class="meta">⏱ ' + r.ms + 'ms • coverage ' + Math.round(r.coverage * 100) + '% • ' + (r.fullPhrase ? "phrase-match ✅" : "word-gloss") + " • " + { sat: "Santali", hoc: "Ho", unr: "Mundari" }[LANG] + (aiUsed ? ' <span class="ai-badge">✨ Sarvam AI</span>' : "") + "</div>";
+    if (window.PalashCorr && r.output) attachCorrBar($("tout"), r);
+  }
+  function lessonCtx() {
+    const l = cur();
+    return { lesson_id: l ? l.id : "", category: l ? (l.nipun || []).join(",") : "" };
+  }
+  function attachCorrBar(container, r) {
+    const ctx = lessonCtx();
+    PalashCorr.attachActions(container, {
+      hindi: r.input, original: r.output, lang: LANG, method: "text",
+      lesson_id: ctx.lesson_id, category: ctx.category
+    });
+  }
+  function renderCorrScreen() {
+    if (!window.PalashCorr) return;
+    PalashCorr.renderStats($("corrStats"));
+    const lang = $("corrFilter") ? $("corrFilter").value : "";
+    PalashCorr.renderList($("corrList"), { lang });
   }
   function doTranslate() {
     const t = $("hin").value.trim() || ($("lessonScript") ? $("lessonScript").textContent : "");
@@ -60,6 +79,7 @@
         if (!ai || $("hin").value.trim() !== t) return;
         $("tout").innerHTML = '<div class="tri">' + ai + '</div>' +
           '<div class="meta">✨ Sarvam AI (hi-IN → sat-IN) • full-sentence translation</div>';
+        if (window.PalashCorr) { const ctx = lessonCtx(); PalashCorr.attachActions($("tout"), { hindi: t, original: ai, lang: LANG, method: "text", lesson_id: ctx.lesson_id, category: ctx.category }); }
       }).catch(() => {});
     }
     return r;
@@ -92,7 +112,10 @@
         if (s.stage === "hearing") $("vstat").textContent = "🎙 सुन रहे हैं: " + s.text;
         if (s.stage === "hindi") { $("vstat").textContent = "🗣 शिक्षक (Hindi): " + s.text; $("hin").value = s.text; }
         if (s.stage === "ai") $("vstat").textContent = "✨ Sarvam AI पूरा-वाक्य अनुवाद कर रहा है…";
-        if (s.stage === "tribal") $("vout").innerHTML = '<div class="tri">' + s.text + '</div><div class="meta">MT ' + s.ms + 'ms • coverage ' + Math.round(s.coverage * 100) + "%" + (s.ai ? ' <span class="ai-badge">✨ Sarvam AI</span>' : "") + "</div>";
+        if (s.stage === "tribal") {
+          $("vout").innerHTML = '<div class="tri">' + s.text + '</div><div class="meta">MT ' + s.ms + 'ms • coverage ' + Math.round(s.coverage * 100) + "%" + (s.ai ? ' <span class="ai-badge">✨ Sarvam AI</span>' : "") + "</div>";
+          if (window.PalashCorr && s.text) { const ctx = lessonCtx(); PalashCorr.attachActions($("vout"), { hindi: $("hin").value, original: s.text, lang: LANG, method: "voice", lesson_id: ctx.lesson_id, category: ctx.category }); }
+        }
         if (s.stage === "done") {
           $("vlat").innerHTML = "कुल वॉइस-लेटेंसी: <span class=\"lat " + (s.ok ? "ok" : "bad") + "\">" + s.ms + "ms " + (s.ok ? "✅" : "⚠️") + "</span>";
           $("vstat").textContent = "तैयार — फिर बोलें।";
@@ -107,7 +130,10 @@
     $("vgo").addEventListener("click", () => {
       const t = $("hin").value.trim() || "तालियाँ बजाओ — बहुत अच्छा!";
       PalashVoice.pipeline(t, LANG, (s) => {
-        if (s.stage === "tribal") $("vout").innerHTML = '<div class="tri">' + s.text + '</div><div class="meta">MT ' + s.ms + 'ms</div>';
+        if (s.stage === "tribal") {
+          $("vout").innerHTML = '<div class="tri">' + s.text + '</div><div class="meta">MT ' + s.ms + 'ms</div>';
+          if (window.PalashCorr && s.text) { const ctx = lessonCtx(); PalashCorr.attachActions($("vout"), { hindi: t, original: s.text, lang: LANG, method: "voice", lesson_id: ctx.lesson_id, category: ctx.category }); }
+        }
         if (s.stage === "done") $("vlat").innerHTML = "कुल वॉइस-लेटेंसी: <span class=\"lat " + (s.ok ? "ok" : "bad") + "\">" + s.ms + "ms " + (s.ok ? "✅ (3000ms" : "⚠️") + "</span>";
       });
     });
@@ -124,6 +150,12 @@
       PalashVoice.speakAll([l.title_hi].concat(l.script_hi), LANG, () => { $("speakAllBtn").textContent = "🔊 पूरा पाठ सुनाओ"; });
     });
     $("dictSearch").addEventListener("input", dictSearch);
+    if (window.PalashCorr) {
+      $("exportCsv").addEventListener("click", () => PalashCorr.exportAs("csv"));
+      $("exportJsonl").addEventListener("click", () => PalashCorr.exportAs("jsonl"));
+      $("corrFilter").addEventListener("change", renderCorrScreen);
+      $("corrRefresh").addEventListener("click", renderCorrScreen);
+    }
     $("shareBtn").addEventListener("click", shareWorksheet);
     const aiChk = $("aiOn");
     if (aiChk && window.PalashAI) {

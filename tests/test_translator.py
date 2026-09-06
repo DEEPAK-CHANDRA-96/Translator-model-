@@ -66,3 +66,12 @@ print(f"avg scan {ms:.2f}ms | budget: STT~1200+MT~{ms:.0f}+TTS~800 = <3000ms -> 
 print("--- size check (<500KB) ---")
 tot = sum(f.stat().st_size for f in (base).rglob("*") if f.is_file() and ".git" not in str(f) and f.suffix in (".js", ".html", ".css", ".json"))
 print(f"{tot/1024:.0f}KB {'PASS' if tot < 500*1024 else 'FAIL'}")
+
+print("--- teacher corrections store (Phase 6) ---")
+try:
+    r2 = subprocess.run(["node", str(base / "tests" / "test_corrections.js"), str(base / "js" / "corrections.js")],
+                        capture_output=True, text=True, timeout=30)
+    print(r2.stdout[-700:])
+    print(("PASS" if "RESULT" in r2.stdout and "FAIL " not in r2.stdout else "FAIL") + " corrections harness")
+except FileNotFoundError:
+    print("node not available, skipped corrections test")

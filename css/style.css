@@ -58,3 +58,16 @@ button.sm{padding:6px 10px;font-size:12px;min-height:32px;border-radius:8px}
 main .card{animation:slideUp .3s ease-out}
 @media print{.tabs,header .badge,button,.no-print,.splash{display:none!important}main{max-width:100%}.card{box-shadow:none;border:none;animation:none}}
 @media (max-width:380px){.tabs a{font-size:12px;padding:6px 8px}.card{padding:12px}textarea{min-height:60px}}
+.corrbar{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.corrbar textarea{min-height:56px;font-size:15px}
+.vs-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin:10px 0}
+.vs-stats>div{background:#f0f6ff;border:1px solid #c4d8f0;border-radius:12px;padding:10px;text-align:center}
+.vs-stats b{display:block;font-size:22px;color:var(--acc)}.vs-stats b.c-ok{color:#137a2a}.vs-stats b.c-flag{color:#b35000}
+.vs-stats span{font-size:11px;color:#5a6b5a}
+.vs-badge{display:inline-block;color:#fff;font-size:10px;font-weight:800;border-radius:10px;padding:2px 8px;vertical-align:middle}
+.vrec{border:1px solid #d8e6d8;border-radius:12px;padding:10px;margin:8px 0;background:#fbfefb}
+.vrec-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.vrec-lang{font-weight:800;color:var(--acc);font-size:12px}
+.vrec-hi{font-weight:700;margin:6px 0 2px}.vrec-orig,.vrec-corr{padding:4px 8px;border-radius:8px;margin:3px 0;background:#fff}
+.vrec-corr.diff{background:#fff3e0;border:1px solid #f0c060}
+.vrec-actions{margin-top:6px}.vrec-edit{background:#f7faf7;border:1px dashed #b9d2b9;border-radius:12px;padding:10px;margin-top:8px}
+.vrec-edit label{display:block;margin:6px 0 2px}.vrec-edit textarea,.vrec-edit input{font-size:15px;padding:8px}
