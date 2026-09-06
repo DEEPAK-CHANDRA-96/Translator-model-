@@ -6,8 +6,11 @@
   async function load() {
     try {
       const r = await fetch("data/fln_lessons.json");
-      DATA = await r.json();
-    } catch (e) { DATA = { nipun: {}, lessons: [] }; }
+      if (r.ok) { const j = await r.json(); if (j && j.lessons) { DATA = j; } }
+      if (!DATA) throw new Error("no lessons via fetch");
+    } catch (e) {
+      DATA = window.FLN_LESSONS ? JSON.parse(JSON.stringify(window.FLN_LESSONS)) : { nipun: {}, lessons: [] };
+    }
     const sel = $("lesson");
     if (DATA.lessons) DATA.lessons.forEach(l => { const o = document.createElement("option"); o.value = l.id; o.textContent = l.id + " • " + l.title_hi; sel.appendChild(o); });
     renderLesson(); badge();
@@ -85,9 +88,11 @@
     return r;
   }
   function renderLesson() {
-    const l = cur(); if (!l) return;
-    if ($("lessonScript")) $("lessonScript").innerHTML = l.script_hi.map(s => "<div>• " + s + "</div>").join("");
-    if (DATA && DATA.nipun) $("sheet").innerHTML = PalashGen.worksheetHTML(l, LANG, DATA.nipun);
+    const l = cur();
+    if (l) {
+      if ($("lessonScript")) $("lessonScript").innerHTML = l.script_hi.map(s => "<div>• " + s + "</div>").join("");
+      if (DATA && DATA.nipun) $("sheet").innerHTML = PalashGen.worksheetHTML(l, LANG, DATA.nipun);
+    }
     $("cards").innerHTML = PalashGen.flashcardsHTML(["पेड़", "फूल", "नदी", "फल", "आम", "केला", "गाय", "कुत्ता", "घोड़ा", "सूरज", "बारिश", "पहाड़", "मोर", "पानी", "किताब", "एक", "दो", "तीन"], LANG);
   }
   function shareWorksheet() {
