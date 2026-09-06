@@ -39,12 +39,15 @@ concrete=infer.get_concrete_function(tf.TensorSpec([None,25],tf.int32), tf.Tenso
 cv=tf.lite.TFLiteConverter.from_concrete_functions([concrete]); tfl=cv.convert()
 open(f"{MODEL}/model.tflite","wb").write(tfl)
 print("model.tflite:", round(os.path.getsize(f"{MODEL}/model.tflite")/1e6,2),"MB")
-c8=tf.lite.TFLiteConverter.from_concrete_functions([concrete])
-c8.optimizations=[tf.lite.Optimize.DEFAULT]
-c8.representative_dataset=lambda: [np.array([1]*25, dtype=np.float32) for _ in range(30)]
-c8.target_spec.supported_ops=[tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
-c8.inference_input_type=tf.int32; c8.inference_output_type=tf.float32
-t8=c8.convert(); open(f"{MODEL}/model_int8.tflite","wb").write(t8)
-print("model_int8.tflite:", round(os.path.getsize(f"{MODEL}/model_int8.tflite")/1e6,2),"MB")
+try:
+    c8=tf.lite.TFLiteConverter.from_concrete_functions([concrete])
+    c8.optimizations=[tf.lite.Optimize.DEFAULT]
+    c8.representative_dataset=lambda: [ {"src": np.array([1]*25,dtype=np.int32), "prev": np.array([[0]],dtype=np.int32)} for _ in range(30)]
+    c8.target_spec.supported_ops=[tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+    c8.inference_input_type=tf.int8; c8.inference_output_type=tf.int8
+    t8=c8.convert(); open(f"{MODEL}/model_int8.tflite","wb").write(t8)
+    print("model_int8.tflite:", round(os.path.getsize(f"{MODEL}/model_int8.tflite")/1e6,2),"MB")
+except Exception as e:
+    print("int8 export skipped (best-effort):", type(e).__name__, str(e)[:200])
 print("weights:", round(os.path.getsize(f'{MODEL}/best.weights.h5')/1e6,2),"MB")
 print("files:", os.listdir(MODEL))
