@@ -1,0 +1,22 @@
+{
+  "dev": {
+    "bleu": 0.0,
+    "chrF": 2.22,
+    "exact": 0.0,
+    "n": 84
+  },
+  "test": {
+    "bleu": 0.0,
+    "chrF": 4.55,
+    "exact": 0.0,
+    "n": 84
+  },
+  "closed": {
+    "bleu": 0.0,
+    "chrF": 1.72,
+    "exact": 0.0,
+    "n": 99
+  },
+  "latency_ms": 523.1,
+  "peak_ram_bytes": 72013
+}
